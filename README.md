@@ -80,6 +80,8 @@ When introducing "unseen" images from the web, the difference became striking:
 
 
 ```bash
+git clone [https://github.com/Fayezx0/w4_DeapLearning.git](https://github.com/Fayezx0/w4_DeapLearning.git)
+cd w4_DeapLearning
 python -m venv venv
 .\venv\Scripts\activate
 pip install -r requirements.txt
