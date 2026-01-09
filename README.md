@@ -10,7 +10,7 @@
 ## 📌 Project Overview
 Horse breed recognition is a classic example of **Fine-Grained Image Classification**. Unlike distinguishing a cat from a dog, distinguishing an *Akhal-Teke* from an *Arabian* horse requires a model that can perceive subtle details in muscle structure, coat texture, and body proportions.
 
-This project implements a robust classification pipeline using **Transfer Learning**. We utilize **MaxViT (Multi-Axis Vision Transformer)**, a hybrid architecture that combines the local feature extraction capabilities of CNNs with the global context understanding of Transformers.
+This project implements a robust classification pipeline using **Transfer Learning**. utilize **MaxViT (Multi-Axis Vision Transformer)**, a hybrid architecture that combines the local feature extraction capabilities of CNNs with the global context understanding of Transformers.
 
 ## 📂 The Dataset
 The dataset was sourced from Kaggle and consists of images representing 7 distinct horse breeds. 
@@ -33,7 +33,7 @@ We implemented a **Custom Dataset Class** in PyTorch to:
 7.  **Friesian**
 
 ## 🧠 Model Architecture: Why MaxViT?
-We selected **MaxViT-T (Tiny)** from the `torchvision` library. MaxViT is a hybrid architecture developed by Google Research that bridges the gap between Convolutional Neural Networks (CNNs) and Vision Transformers (ViTs).
+**MaxViT-T (Tiny)** from the `torchvision` is a hybrid architecture developed by Google Research that bridges the gap between Convolutional Neural Networks (CNNs) and Vision Transformers (ViTs).
 
 ### Key Features:
 * **Multi-Axis Attention:** Traditional Transformers are computationally expensive on high-resolution images. MaxViT solves this by decomposing attention into "Block Attention" (local) and "Grid Attention" (global).
@@ -41,7 +41,7 @@ We selected **MaxViT-T (Tiny)** from the `torchvision` library. MaxViT is a hybr
 * **Efficiency:** It achieves better accuracy than ResNet-50 and standard ViT models with lower computational cost.
 
 ## ⚙️ Methodology
-We conducted a two-phase experiment to optimize performance:
+Conducted a two-phase experiment to optimize performance:
 
 ### Phase 1: Feature Extraction (Frozen Model)
 * **Objective:** Establish a baseline using the pre-trained knowledge of MaxViT (trained on ImageNet).
@@ -52,12 +52,36 @@ We conducted a two-phase experiment to optimize performance:
 * **Objective:** Specialize the model specifically for equine features.
 * **Technique:** We **unfroze** the entire network. A lower Learning Rate (`1e-4`) was used to gently update the weights without destroying the pre-trained patterns.
 * **Result:** Significant improvement in accuracy and confidence scores. The model learned specific breed traits (e.g., the metallic sheen of the Akhal-Teke vs. the heavy build of the Percheron).
+## 🔍 Experimental Observations
+
+### 1. Training Performance Comparison
+* **Frozen Model:** Accuracy plateaued at **88.96%**. Since the backbone weights were locked, the model reached a "glass ceiling" because it couldn't adapt its internal filters to the specific nuances of horse breeds.
+* **Fine-tuned Model:** Achieved **100% accuracy** rapidly (around Epoch 7). By allowing the weights to update across all layers, the model successfully specialized its filters to capture the unique geometric proportions of the breeds.
+
+### 2. Testing on Unseen Internet Images (Arabian Horse)
+When introducing "unseen" images from the web, the difference became striking:
+* **Frozen Model:** Showed a "Confidence Gap." Even when the model was "correct," its confidence was dangerously low (under 40%), and it confused the Arabian horse with the Orlov Trotter.
+* **Fine-tuned Model:** Showed high confidence (up to 97.9%), proving it learned specific fine-grained markers like the "dished" facial profile and high tail carriage.
+
+### 3. Small Dataset Analysis (140 Images / 20 per class)
+* **model2 (Frozen - Small Data):** Reached 97.14% training accuracy by mapping high-level features it already knew, but failed significantly on generalization (e.g., misclassifying an Arabian as a Percheron).
+* **fn_model2 (Fine-tuned - Small Data):** Hit 100% training accuracy almost instantly by memorizing the training set. However, it failed on external test cases, proving the "data hunger" of deep learning in fine-grained tasks.
+
+## 📊 Model Comparison Schedule
+
+| Model Variant | Strategy | Dataset Size | Training Acc | Generalization (Test Case) |
+| :--- | :--- | :--- | :--- | :--- |
+| **MaxViT_T (Full)** | Frozen | 670 images | 88.96% | Incorrect / Low Confidence |
+| **MaxViT_T (Full)** | **Fine-Tuned** | 670 images | **100%** | **Correct (97.9% Confidence)** |
+| **model2 (Small)** | Frozen | 140 images | 97.14% | Failed (Incorrect Breed) |
+| **fn_model2 (Small)** | Fine-Tuned | 140 images | 100% | Failed (Inconsistent results) |
 
 ## 🛠️ Installation & Setup
 
-### Prerequisites
 
 ```bash
 python -m venv venv
 .\venv\Scripts\activate
-pip pip install -r requirements.txt
+pip install -r requirements.txt
+
+
